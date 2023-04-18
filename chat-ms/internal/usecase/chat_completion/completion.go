@@ -1,12 +1,10 @@
-package chat_completion_stream
+package chat_completion
 
 import (
 	"context"
 	"davisbento/whats-gpt/chat-ms/internal/domain/entity"
 	"davisbento/whats-gpt/chat-ms/internal/domain/gateway"
 	"errors"
-	"io"
-	"strings"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -93,7 +91,7 @@ func (uc *ChatCompletionUseCase) Execute(ctx context.Context, input ChatCompleti
 	}
 
 	// call openai api
-	resp, err := uc.OpenAiClient.CreateChatCompletionStream(ctx, openai.ChatCompletionRequest{
+	resp, err := uc.OpenAiClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model:            chat.Config.Model.Name,
 		Messages:         messages,
 		MaxTokens:        chat.Config.MaxTokens,
@@ -103,39 +101,14 @@ func (uc *ChatCompletionUseCase) Execute(ctx context.Context, input ChatCompleti
 		Stop:             chat.Config.Stop,
 		PresencePenalty:  chat.Config.PresencePenalty,
 		FrequencyPenalty: chat.Config.FrequencyPenalty,
-		Stream:           true,
+		Stream:           false,
 	})
 
 	if err != nil {
 		return nil, errors.New("error calling openai api (chat completion): " + err.Error())
 	}
 
-	var fullResponse strings.Builder
-
-	// read the stream response
-	for {
-		response, err := resp.Recv()
-		// if its end of stream, break
-		if errors.Is(err, io.EOF) {
-			break
-		}
-
-		if err != nil {
-			return nil, errors.New("error reading stream response: " + err.Error())
-		}
-
-		// add the response to the response variable
-		fullResponse.WriteString(response.Choices[0].Delta.Content)
-		r := ChatCompletionOutputDTO{
-			ChatID:  chat.ID,
-			UserID:  chat.UserID,
-			Content: fullResponse.String(),
-		}
-		// send the response to the stream channel
-		uc.Stream <- r
-	}
-
-	assistant, err := entity.NewMessage("assistant", fullResponse.String(), chat.Config.Model)
+	assistant, err := entity.NewMessage("assistant", resp.Choices[0].Message.Content, chat.Config.Model)
 	if err != nil {
 		return nil, errors.New("error creating assistant message: " + err.Error())
 	}
@@ -153,7 +126,7 @@ func (uc *ChatCompletionUseCase) Execute(ctx context.Context, input ChatCompleti
 	return &ChatCompletionOutputDTO{
 		ChatID:  chat.ID,
 		UserID:  chat.UserID,
-		Content: fullResponse.String(),
+		Content: resp.Choices[0].Message.Content,
 	}, nil
 }
 

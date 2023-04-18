@@ -14,33 +14,12 @@ INSERT INTO
     stop,
     max_tokens,
     presence_penalty,
-    frequency_penalty
+    frequency_penalty,
+    created_at,
+    updated_at
   )
 VALUES
-  (
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?
-  );
-
--- name: FindChatByID :one
-SELECT
-  *
-FROM
-  chats
-WHERE
-  id = ?;
+(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: AddMessage :exec
 INSERT INTO
@@ -52,19 +31,19 @@ INSERT INTO
     tokens,
     model,
     erased,
-    order_msg
+    order_msg,
+    created_at
   )
 VALUES
-  (
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?
-  );
+(?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: FindChatByID :one
+SELECT
+  *
+FROM
+  chats
+WHERE
+  id = ?;
 
 -- name: FindMessagesByChatID :many
 SELECT
@@ -72,10 +51,10 @@ SELECT
 FROM
   messages
 WHERE
-  chat_id = ?
-  AND erased = 0
-ORDER BY
-  order_msg ASC;
+  erased = 0
+  and chat_id = ?
+order by
+  order_msg asc;
 
 -- name: FindErasedMessagesByChatID :many
 SELECT
@@ -83,7 +62,41 @@ SELECT
 FROM
   messages
 WHERE
-  chat_id = ?
-  AND erased = 1
-ORDER BY
-  order_msg ASC;
+  erased = 1
+  and chat_id = ?
+order by
+  order_msg asc;
+
+-- name: SaveChat :exec
+UPDATE
+  chats
+SET
+  user_id = ?,
+  initial_message_id = ?,
+  status = ?,
+  token_usage = ?,
+  model = ?,
+  model_max_tokens = ?,
+  temperature = ?,
+  top_p = ?,
+  n = ?,
+  stop = ?,
+  max_tokens = ?,
+  presence_penalty = ?,
+  frequency_penalty = ?,
+  updated_at = ?
+WHERE
+  id = ?;
+
+-- name: DeleteChatMessages :exec
+DELETE FROM
+  messages
+WHERE
+  chat_id = ?;
+
+-- name: DeleteErasedChatMessages :exec
+DELETE FROM
+  messages
+WHERE
+  erased = 1
+  and chat_id = ?;

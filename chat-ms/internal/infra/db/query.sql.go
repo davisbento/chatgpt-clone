@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const addMessage = `-- name: AddMessage :exec
@@ -19,30 +20,23 @@ INSERT INTO
     tokens,
     model,
     erased,
-    order_msg
+    order_msg,
+    created_at
   )
 VALUES
-  (
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?
-  )
+(?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type AddMessageParams struct {
-	ID       string
-	ChatID   string
-	Role     string
-	Content  string
-	Tokens   int32
-	Model    string
-	Erased   bool
-	OrderMsg int32
+	ID        string
+	ChatID    string
+	Role      string
+	Content   string
+	Tokens    int32
+	Model     string
+	Erased    bool
+	OrderMsg  int32
+	CreatedAt time.Time
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) error {
@@ -55,6 +49,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) error {
 		arg.Model,
 		arg.Erased,
 		arg.OrderMsg,
+		arg.CreatedAt,
 	)
 	return err
 }
@@ -75,25 +70,12 @@ INSERT INTO
     stop,
     max_tokens,
     presence_penalty,
-    frequency_penalty
+    frequency_penalty,
+    created_at,
+    updated_at
   )
 VALUES
-  (
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?
-  )
+(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateChatParams struct {
@@ -111,6 +93,8 @@ type CreateChatParams struct {
 	MaxTokens        int32
 	PresencePenalty  float64
 	FrequencyPenalty float64
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 func (q *Queries) CreateChat(ctx context.Context, arg CreateChatParams) error {
@@ -129,7 +113,34 @@ func (q *Queries) CreateChat(ctx context.Context, arg CreateChatParams) error {
 		arg.MaxTokens,
 		arg.PresencePenalty,
 		arg.FrequencyPenalty,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
+	return err
+}
+
+const deleteChatMessages = `-- name: DeleteChatMessages :exec
+DELETE FROM
+  messages
+WHERE
+  chat_id = ?
+`
+
+func (q *Queries) DeleteChatMessages(ctx context.Context, chatID string) error {
+	_, err := q.db.ExecContext(ctx, deleteChatMessages, chatID)
+	return err
+}
+
+const deleteErasedChatMessages = `-- name: DeleteErasedChatMessages :exec
+DELETE FROM
+  messages
+WHERE
+  erased = 1
+  and chat_id = ?
+`
+
+func (q *Queries) DeleteErasedChatMessages(ctx context.Context, chatID string) error {
+	_, err := q.db.ExecContext(ctx, deleteErasedChatMessages, chatID)
 	return err
 }
 
@@ -172,10 +183,10 @@ SELECT
 FROM
   messages
 WHERE
-  chat_id = ?
-  AND erased = 1
-ORDER BY
-  order_msg ASC
+  erased = 1
+  and chat_id = ?
+order by
+  order_msg asc
 `
 
 func (q *Queries) FindErasedMessagesByChatID(ctx context.Context, chatID string) ([]Message, error) {
@@ -218,10 +229,10 @@ SELECT
 FROM
   messages
 WHERE
-  chat_id = ?
-  AND erased = 0
-ORDER BY
-  order_msg ASC
+  erased = 0
+  and chat_id = ?
+order by
+  order_msg asc
 `
 
 func (q *Queries) FindMessagesByChatID(ctx context.Context, chatID string) ([]Message, error) {
@@ -256,4 +267,65 @@ func (q *Queries) FindMessagesByChatID(ctx context.Context, chatID string) ([]Me
 		return nil, err
 	}
 	return items, nil
+}
+
+const saveChat = `-- name: SaveChat :exec
+UPDATE
+  chats
+SET
+  user_id = ?,
+  initial_message_id = ?,
+  status = ?,
+  token_usage = ?,
+  model = ?,
+  model_max_tokens = ?,
+  temperature = ?,
+  top_p = ?,
+  n = ?,
+  stop = ?,
+  max_tokens = ?,
+  presence_penalty = ?,
+  frequency_penalty = ?,
+  updated_at = ?
+WHERE
+  id = ?
+`
+
+type SaveChatParams struct {
+	UserID           string
+	InitialMessageID string
+	Status           string
+	TokenUsage       int32
+	Model            string
+	ModelMaxTokens   int32
+	Temperature      float64
+	TopP             float64
+	N                int32
+	Stop             string
+	MaxTokens        int32
+	PresencePenalty  float64
+	FrequencyPenalty float64
+	UpdatedAt        time.Time
+	ID               string
+}
+
+func (q *Queries) SaveChat(ctx context.Context, arg SaveChatParams) error {
+	_, err := q.db.ExecContext(ctx, saveChat,
+		arg.UserID,
+		arg.InitialMessageID,
+		arg.Status,
+		arg.TokenUsage,
+		arg.Model,
+		arg.ModelMaxTokens,
+		arg.Temperature,
+		arg.TopP,
+		arg.N,
+		arg.Stop,
+		arg.MaxTokens,
+		arg.PresencePenalty,
+		arg.FrequencyPenalty,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	return err
 }
