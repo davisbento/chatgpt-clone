@@ -9,6 +9,56 @@ import (
 	"context"
 )
 
+const addMessage = `-- name: AddMessage :exec
+INSERT INTO
+  messages (
+    id,
+    chat_id,
+    role,
+    content,
+    tokens,
+    model,
+    erased,
+    order_msg
+  )
+VALUES
+  (
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?
+  )
+`
+
+type AddMessageParams struct {
+	ID       string
+	ChatID   string
+	Role     string
+	Content  string
+	Tokens   int32
+	Model    string
+	Erased   bool
+	OrderMsg int32
+}
+
+func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) error {
+	_, err := q.db.ExecContext(ctx, addMessage,
+		arg.ID,
+		arg.ChatID,
+		arg.Role,
+		arg.Content,
+		arg.Tokens,
+		arg.Model,
+		arg.Erased,
+		arg.OrderMsg,
+	)
+	return err
+}
+
 const createChat = `-- name: CreateChat :exec
 INSERT INTO
   chats (
@@ -114,4 +164,96 @@ func (q *Queries) FindChatByID(ctx context.Context, id string) (Chat, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const findErasedMessagesByChatID = `-- name: FindErasedMessagesByChatID :many
+SELECT
+  id, chat_id, role, content, tokens, model, erased, order_msg, created_at, updated_at
+FROM
+  messages
+WHERE
+  chat_id = ?
+  AND erased = 1
+ORDER BY
+  order_msg ASC
+`
+
+func (q *Queries) FindErasedMessagesByChatID(ctx context.Context, chatID string) ([]Message, error) {
+	rows, err := q.db.QueryContext(ctx, findErasedMessagesByChatID, chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Message
+	for rows.Next() {
+		var i Message
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.Role,
+			&i.Content,
+			&i.Tokens,
+			&i.Model,
+			&i.Erased,
+			&i.OrderMsg,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findMessagesByChatID = `-- name: FindMessagesByChatID :many
+SELECT
+  id, chat_id, role, content, tokens, model, erased, order_msg, created_at, updated_at
+FROM
+  messages
+WHERE
+  chat_id = ?
+  AND erased = 0
+ORDER BY
+  order_msg ASC
+`
+
+func (q *Queries) FindMessagesByChatID(ctx context.Context, chatID string) ([]Message, error) {
+	rows, err := q.db.QueryContext(ctx, findMessagesByChatID, chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Message
+	for rows.Next() {
+		var i Message
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.Role,
+			&i.Content,
+			&i.Tokens,
+			&i.Model,
+			&i.Erased,
+			&i.OrderMsg,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

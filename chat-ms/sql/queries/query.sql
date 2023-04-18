@@ -41,3 +41,49 @@ FROM
   chats
 WHERE
   id = ?;
+
+-- name: AddMessage :exec
+INSERT INTO
+  messages (
+    id,
+    chat_id,
+    role,
+    content,
+    tokens,
+    model,
+    erased,
+    order_msg
+  )
+VALUES
+  (
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?
+  );
+
+-- name: FindMessagesByChatID :many
+SELECT
+  *
+FROM
+  messages
+WHERE
+  chat_id = ?
+  AND erased = 0
+ORDER BY
+  order_msg ASC;
+
+-- name: FindErasedMessagesByChatID :many
+SELECT
+  *
+FROM
+  messages
+WHERE
+  chat_id = ?
+  AND erased = 1
+ORDER BY
+  order_msg ASC;
