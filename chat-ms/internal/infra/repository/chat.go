@@ -38,6 +38,8 @@ func (r *ChatRepositoryMySQL) CreateChat(ctx context.Context, chat *entity.Chat)
 			Stop:             chat.Config.Stop[0],
 			PresencePenalty:  float64(chat.Config.PresencePenalty),
 			FrequencyPenalty: float64(chat.Config.FrequencyPenalty),
+			CreatedAt:        time.Now(),
+			UpdatedAt:        time.Now(),
 		},
 	)
 
@@ -46,12 +48,14 @@ func (r *ChatRepositoryMySQL) CreateChat(ctx context.Context, chat *entity.Chat)
 	}
 
 	err = r.Queries.AddMessage(ctx, db.AddMessageParams{
-		ID:      chat.InitialSystemMessage.ID,
-		ChatID:  chat.ID,
-		Content: chat.InitialSystemMessage.Content,
-		Role:    chat.InitialSystemMessage.Role,
-		Tokens:  int32(chat.InitialSystemMessage.Tokens),
-		Erased:  false,
+		ID:        chat.InitialSystemMessage.ID,
+		ChatID:    chat.ID,
+		Content:   chat.InitialSystemMessage.Content,
+		Role:      chat.InitialSystemMessage.Role,
+		Tokens:    int32(chat.InitialSystemMessage.Tokens),
+		Erased:    false,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	})
 
 	if err != nil {
@@ -166,14 +170,16 @@ func (r *ChatRepositoryMySQL) SaveChat(ctx context.Context, chat *entity.Chat) e
 		err = r.Queries.AddMessage(
 			ctx,
 			db.AddMessageParams{
-				ID:       message.ID,
-				ChatID:   chat.ID,
-				Content:  message.Content,
-				Role:     message.Role,
-				Tokens:   int32(message.Tokens),
-				Model:    chat.Config.Model.Name,
-				OrderMsg: int32(i),
-				Erased:   false,
+				ID:        message.ID,
+				ChatID:    chat.ID,
+				Content:   message.Content,
+				Role:      message.Role,
+				Tokens:    int32(message.Tokens),
+				Model:     chat.Config.Model.Name,
+				OrderMsg:  int32(i),
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+				Erased:    false,
 			},
 		)
 		if err != nil {
@@ -187,14 +193,16 @@ func (r *ChatRepositoryMySQL) SaveChat(ctx context.Context, chat *entity.Chat) e
 		err = r.Queries.AddMessage(
 			ctx,
 			db.AddMessageParams{
-				ID:       message.ID,
-				ChatID:   chat.ID,
-				Content:  message.Content,
-				Role:     message.Role,
-				Tokens:   int32(message.Tokens),
-				Model:    chat.Config.Model.Name,
-				OrderMsg: int32(i),
-				Erased:   true,
+				ID:        message.ID,
+				ChatID:    chat.ID,
+				Content:   message.Content,
+				Role:      message.Role,
+				Tokens:    int32(message.Tokens),
+				Model:     chat.Config.Model.Name,
+				OrderMsg:  int32(i),
+				Erased:    true,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
 			},
 		)
 		if err != nil {

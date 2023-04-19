@@ -21,10 +21,11 @@ INSERT INTO
     model,
     erased,
     order_msg,
-    created_at
+    created_at,
+    updated_at
   )
 VALUES
-(?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type AddMessageParams struct {
@@ -37,6 +38,7 @@ type AddMessageParams struct {
 	Erased    bool
 	OrderMsg  int32
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) error {
@@ -50,6 +52,7 @@ func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) error {
 		arg.Erased,
 		arg.OrderMsg,
 		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
 	return err
 }
@@ -75,7 +78,7 @@ INSERT INTO
     updated_at
   )
 VALUES
-(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateChatParams struct {

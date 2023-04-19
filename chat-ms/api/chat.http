@@ -1,0 +1,20 @@
+POST http://localhost:8080/chat HTTP/1.1
+Content-Type: application/json
+Authorization: 123456
+
+{
+    "user_id": "1",
+    "user_message": "Olá, qual é o seu nome?"
+}
+
+###
+
+POST http://localhost:8080/chat HTTP/1.1
+Content-Type: application/json
+Authorization: 123456
+
+{
+    "chat_id": "62477b58-495b-480e-ac68-59a6091a0e28",
+    "user_id": "1",
+    "user_message": "continue"
+}
