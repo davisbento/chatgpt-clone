@@ -3,10 +3,12 @@ package main
 import (
 	"database/sql"
 	"davisbento/whats-gpt/chat-ms/configs"
+	"davisbento/whats-gpt/chat-ms/internal/infra/grpc/server"
 	"davisbento/whats-gpt/chat-ms/internal/infra/repository"
 	"davisbento/whats-gpt/chat-ms/internal/infra/web"
 	"davisbento/whats-gpt/chat-ms/internal/infra/web/webserver"
 	chatcompletion "davisbento/whats-gpt/chat-ms/internal/usecase/chat_completion"
+	"davisbento/whats-gpt/chat-ms/internal/usecase/chat_completion_stream"
 
 	"fmt"
 
@@ -41,10 +43,31 @@ func main() {
 		InitialSystemMessage: configs.InitialChatMessage,
 	}
 
+	chatConfigStream := chat_completion_stream.ChatCompletionConfigInputDTO{
+		Model:                configs.Model,
+		ModelMaxTokens:       configs.ModelMaxTokens,
+		Temperature:          float32(configs.Temperature),
+		TopP:                 float32(configs.TopP),
+		N:                    configs.N,
+		Stop:                 configs.Stop,
+		MaxTokens:            configs.MaxTokens,
+		InitialSystemMessage: configs.InitialChatMessage,
+	}
+
 	useCase := chatcompletion.NewChatCompletionUseCase(repo, client)
 
-	// streamChannel := make(chan chat_completion_stream.ChatCompletionOutputDTO)
-	// useCaseStream := chat_completion_stream.NewChatCompletionStreamUseCase(repo, client, streamChannel)
+	streamChannel := make(chan chat_completion_stream.ChatCompletionOutputDTO)
+	useCaseStream := chat_completion_stream.NewChatCompletionStreamUseCase(repo, client, streamChannel)
+
+	fmt.Println("Starting gRPC server on port " + configs.GRPCServerPort)
+	grpcServer := server.NewGRPCServer(
+		*useCaseStream,
+		chatConfigStream,
+		configs.GRPCServerPort,
+		configs.AuthToken,
+		streamChannel,
+	)
+	go grpcServer.Start()
 
 	webServer := webserver.NewWebServer(":" + configs.WebServerPort)
 	webServerChatHandler := web.NewWebChatGPTHandler(*useCase, chatConfig, configs.AuthToken)
