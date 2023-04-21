@@ -1,8 +1,8 @@
 package service
 
 import (
-	"davisbento/whats-gpt/chat-ms/internal/infra/grpc/pb"
-	chatcompletionstream "davisbento/whats-gpt/chat-ms/internal/usecase/chat_completion_stream"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/grpc/pb"
+	chatcompletionstream "davisbento/chatgpt-clone/chat-ms/internal/usecase/chat_completion_stream"
 )
 
 type ChatService struct {

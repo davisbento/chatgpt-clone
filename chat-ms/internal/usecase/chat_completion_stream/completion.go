@@ -2,8 +2,8 @@ package chat_completion_stream
 
 import (
 	"context"
-	"davisbento/whats-gpt/chat-ms/internal/domain/entity"
-	"davisbento/whats-gpt/chat-ms/internal/domain/gateway"
+	"davisbento/chatgpt-clone/chat-ms/internal/domain/entity"
+	"davisbento/chatgpt-clone/chat-ms/internal/domain/gateway"
 	"errors"
 	"io"
 	"strings"

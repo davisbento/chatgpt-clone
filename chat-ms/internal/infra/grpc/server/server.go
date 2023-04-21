@@ -1,11 +1,11 @@
 package server
 
 import (
-	"davisbento/whats-gpt/chat-ms/internal/infra/grpc/pb"
-	"davisbento/whats-gpt/chat-ms/internal/infra/grpc/service"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/grpc/pb"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/grpc/service"
 	"net"
 
-	chatcompletionstream "davisbento/whats-gpt/chat-ms/internal/usecase/chat_completion_stream"
+	chatcompletionstream "davisbento/chatgpt-clone/chat-ms/internal/usecase/chat_completion_stream"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

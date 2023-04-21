@@ -1,7 +1,7 @@
 package web
 
 import (
-	chatCompletion "davisbento/whats-gpt/chat-ms/internal/usecase/chat_completion"
+	chatCompletion "davisbento/chatgpt-clone/chat-ms/internal/usecase/chat_completion"
 	"encoding/json"
 	"io"
 	"net/http"

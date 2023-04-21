@@ -1,4 +1,4 @@
-module davisbento/whats-gpt/chat-ms
+module davisbento/chatgpt-clone/chat-ms
 
 go 1.20
 

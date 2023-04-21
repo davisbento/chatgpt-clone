@@ -2,13 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"davisbento/whats-gpt/chat-ms/configs"
-	"davisbento/whats-gpt/chat-ms/internal/infra/grpc/server"
-	"davisbento/whats-gpt/chat-ms/internal/infra/repository"
-	"davisbento/whats-gpt/chat-ms/internal/infra/web"
-	"davisbento/whats-gpt/chat-ms/internal/infra/web/webserver"
-	chatcompletion "davisbento/whats-gpt/chat-ms/internal/usecase/chat_completion"
-	"davisbento/whats-gpt/chat-ms/internal/usecase/chat_completion_stream"
+	"davisbento/chatgpt-clone/chat-ms/configs"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/grpc/server"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/repository"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/web"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/web/webserver"
+	chatcompletion "davisbento/chatgpt-clone/chat-ms/internal/usecase/chat_completion"
+	"davisbento/chatgpt-clone/chat-ms/internal/usecase/chat_completion_stream"
 
 	"fmt"
 

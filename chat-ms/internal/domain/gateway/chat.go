@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"context"
-	"davisbento/whats-gpt/chat-ms/internal/domain/entity"
+	"davisbento/chatgpt-clone/chat-ms/internal/domain/entity"
 )
 
 type ChatGateway interface {

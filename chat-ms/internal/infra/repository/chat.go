@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"davisbento/whats-gpt/chat-ms/internal/domain/entity"
-	"davisbento/whats-gpt/chat-ms/internal/infra/db"
+	"davisbento/chatgpt-clone/chat-ms/internal/domain/entity"
+	"davisbento/chatgpt-clone/chat-ms/internal/infra/db"
 	"errors"
 	"time"
 )
