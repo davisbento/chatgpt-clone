@@ -24,19 +24,6 @@ export class ChatServiceClient {
 			},
 			metadata
 		);
-
-		stream.on('data', (data) => {
-			console.log(data);
-		});
-
-		stream.on('error', (error) => {
-			console.log(error);
-		});
-
-		stream.on('end', () => {
-			console.log('end');
-		});
-
 		return stream;
 	}
 }

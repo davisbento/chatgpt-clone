@@ -47,7 +47,6 @@ export async function GET(request: NextRequest, { params }: { params: { messageI
 	let messageReceived: { content: string; chatId: string } | null = null;
 
 	grpcStream.on('data', (data) => {
-		console.log(`data: ${JSON.stringify(data)}`);
 		messageReceived = data;
 		writeStream(writer, 'message', data);
 	});
@@ -59,7 +58,6 @@ export async function GET(request: NextRequest, { params }: { params: { messageI
 	});
 
 	grpcStream.on('end', async () => {
-		console.log('end');
 		if (!messageReceived) {
 			writeStream(writer, 'error', 'No message received');
 			await writer.close();
